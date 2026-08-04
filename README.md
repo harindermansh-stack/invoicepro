@@ -1,10 +1,10 @@
 <div align="center">
-  <!-- source:  .github/screenshots/easy-invoice-logo-readme.png -->
-  <a href="https://easyinvoicepdf.com/?ref=github">
-    <img src="https://github.com/user-attachments/assets/cb9bcc91-b4c8-40b1-b406-bc606c5d9315" alt="EasyInvoicePDF Logo" width="80" height="80">
-  </a>
-  <h1>EasyInvoicePDF</h1>
-  <h3>Free & Open-Source Invoice Generator</h3>
+  <h1>InvoicePro</h1>
+  <h3>by Velocity11</h3>
+  <p><em>A packaged, ready-to-deploy distribution of <a href="https://github.com/VladSez/easy-invoice-pdf">EasyInvoicePDF</a>,
+  an open-source project by Vlad Sazonau, licensed under AGPL v3.</em></p>
+  <p>Original project: <a href="https://easyinvoicepdf.com">easyinvoicepdf.com</a> --
+  this distribution adds setup docs, hosting guidance, and support.</p>
   <p>Create professional invoices instantly in your browser with <strong>Live Preview</strong>, <strong>Instant PDF Export</strong>, <strong>Multiple Customizable Templates</strong> (including a Stripe-style design). <strong>No Ads</strong>. <strong>No Sign-Up Required</strong>.</p>
   <p><a href="https://easyinvoicepdf.com"><strong>Start Invoicing</strong></a></p>
   <p>
