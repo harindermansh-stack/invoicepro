@@ -1,11 +1,11 @@
 {
-  "name": "easy-invoice-pdf",
+  "name": "invoicepro",
   "version": "1.0.3",
   "private": true,
   "packageManager": "pnpm@10.33.4+sha512.1c67b3b359b2d408119ba1ed289f34b8fc3c6873412bec6fd264fbdc82489e510fcbecb9ce9d22dae7f3b76269d8441046014bdca53b9979cd7a561ad631b800",
-  "author": "Vlad Sazonau (https://vladsazon.com)",
-  "homepage": "https://easyinvoicepdf.com",
-  "description": "Free and open-source invoice generator. No sign up, no ads, instant PDF download.",
+  "author": "Velocity11 (Harinder Singh) -- packaged from EasyInvoicePDF by Vlad Sazonau (https://vladsazon.com)",
+  "homepage": "https://velocity11web.vercel.app",
+  "description": "InvoicePro by Velocity11 -- a packaged, ready-to-deploy distribution of the open-source EasyInvoicePDF invoice generator, with setup docs and support.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
