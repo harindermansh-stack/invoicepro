@@ -1,0 +1,15 @@
+InvoicePro (by Velocity11)
+
+This product is a packaged distribution of EasyInvoicePDF, an open-source
+project originally created by Vlad Sazonau (https://vladsazon.com).
+
+Original project: https://github.com/VladSez/easy-invoice-pdf
+Original license: GNU Affero General Public License v3.0 (AGPL-3.0)
+The full license text is included in this repository (see LICENSE).
+
+Copyright (C) 2024-present Uladzislau Sazonau.
+Packaging, setup documentation, and distribution by Velocity11, 2026.
+
+This distribution complies with the AGPL-3.0: the complete corresponding
+source code is provided as-is in this repository, with original copyright
+and license notices intact.
