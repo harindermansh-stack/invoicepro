@@ -23,6 +23,8 @@ jobs:
     runs-on: macos-latest
     env:
       TZ: Europe/Warsaw # we use Europe/Warsaw timezone for consistent date handling across local machines and CI
+      EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
+      EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
     steps:
       - name: Echo environment URL
         env:
@@ -93,16 +95,17 @@ jobs:
 
       - name: 📧 Send email
         ## always notify; subject/body reflect cancellation vs pass/fail
-        if: always()
+        if: always() && env.EMAIL_USERNAME != '' && env.EMAIL_PASSWORD != '' && contains(env.EMAIL_USERNAME, '@')
+        continue-on-error: true
         # https://github.com/dawidd6/action-send-mail
         uses: dawidd6/action-send-mail@d38f3f7cd391cdebfe0d38efc3998b935e951c4f # v16
         with:
           server_address: smtp.gmail.com
           server_port: 587
-          from: "GitHub Actions (no-reply) <${{ secrets.EMAIL_USERNAME }}>"
-          to: ${{ secrets.EMAIL_USERNAME }}
-          username: ${{ secrets.EMAIL_USERNAME }}
-          password: ${{ secrets.EMAIL_PASSWORD }}
+          from: "GitHub Actions (no-reply) <${{ env.EMAIL_USERNAME }}>"
+          to: ${{ env.EMAIL_USERNAME }}
+          username: ${{ env.EMAIL_USERNAME }}
+          password: ${{ env.EMAIL_PASSWORD }}
           subject: ${{ job.status == 'cancelled' && '⚠️ E2E Tests Cancelled' || (steps.playwright.outcome == 'success' && '✅ E2E Tests Passed' || '❌ E2E Tests Failed') }} for ${{ github.repository }}
           body: |
             E2E tests for ${{ github.repository }} have completed.
