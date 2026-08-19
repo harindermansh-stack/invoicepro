@@ -4,7 +4,7 @@ import {
   queueInvoiceGeneration,
 } from "@/app/api/telegram-webhook/lib/telegram-queue";
 import { telegramUpdateSchema } from "@/app/api/telegram-webhook/schema/telegram-schema";
-import { env } from "@/env";
+import { env, hasRedisConfig, hasTelegramConfig } from "@/env";
 import { sendTelegramMessage } from "@/lib/telegram";
 
 import { waitUntil } from "@vercel/functions";
@@ -23,6 +23,13 @@ export const maxDuration = 30; // Set to 30 seconds
  */
 export async function POST(req: NextRequest) {
   try {
+    if (!hasTelegramConfig || !hasRedisConfig) {
+      return NextResponse.json(
+        { error: "Telegram invoice generation integration is not configured" },
+        { status: 503 },
+      );
+    }
+
     const body = await req.text();
 
     // Parse and validate incoming Telegram update

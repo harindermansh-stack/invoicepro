@@ -130,32 +130,32 @@ const ENGLISH_INVOICE_PROD_DATA_BASE = {
   invoiceType: "Reverse Charge",
   invoiceTypeFieldIsVisible: true,
   seller: {
-    name: env.SELLER_NAME,
-    address: env.SELLER_ADDRESS,
+    name: env.SELLER_NAME ?? "Seller name",
+    address: env.SELLER_ADDRESS ?? "Seller address",
 
-    vatNo: env.SELLER_VAT_NO,
+    vatNo: env.SELLER_VAT_NO ?? "Seller vat number",
     vatNoLabelText: "VAT no",
     vatNoFieldIsVisible: true,
 
-    email: env.SELLER_EMAIL,
+    email: env.SELLER_EMAIL ?? "seller@email.com",
     emailFieldIsVisible: true,
-    accountNumber: env.SELLER_ACCOUNT_NUMBER,
+    accountNumber: env.SELLER_ACCOUNT_NUMBER ?? "Seller account number",
     accountNumberFieldIsVisible: true,
 
-    swiftBic: env.SELLER_SWIFT_BIC,
+    swiftBic: env.SELLER_SWIFT_BIC ?? "Seller swift bic",
     swiftBicFieldIsVisible: true,
 
     notesFieldIsVisible: true,
   },
   buyer: {
-    name: env.BUYER_NAME,
-    address: env.BUYER_ADDRESS,
+    name: env.BUYER_NAME ?? "Buyer name",
+    address: env.BUYER_ADDRESS ?? "Buyer address",
 
-    vatNo: env.BUYER_VAT_NO,
+    vatNo: env.BUYER_VAT_NO ?? "Buyer vat number",
     vatNoLabelText: "VAT no",
     vatNoFieldIsVisible: true,
 
-    email: env.BUYER_EMAIL,
+    email: env.BUYER_EMAIL ?? "buyer@email.com",
     emailFieldIsVisible: true,
     notesFieldIsVisible: true,
   },

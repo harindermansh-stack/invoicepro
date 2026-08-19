@@ -35,7 +35,7 @@ Do not place passwords or secret API keys in the public GitHub repository.
    pnpm install
    ```
 
-6. Copy `.env.example` to a new file named `.env.local`.
+6. Copy `.env.example` to a new file named `.env.local` if you plan to configure optional integrations.
 7. Keep optional integration values blank unless you intend to use those features.
 8. Start the development server:
 
@@ -52,7 +52,7 @@ Do not place passwords or secret API keys in the public GitHub repository.
 3. In Vercel, choose **Add New → Project**.
 4. Import the GitHub repository you created.
 5. Let Vercel detect the Next.js framework.
-6. Add only the environment variables required by the optional features you intend to use.
+6. Add only the environment variables required by the optional features you intend to use. Core invoice editing, preview and browser PDF download do not require Resend, Upstash Redis, Telegram, Google Drive, GitHub-token or Sentry credentials.
 7. Start the deployment.
 8. When deployment finishes, open the generated preview URL and test the checklist below.
 

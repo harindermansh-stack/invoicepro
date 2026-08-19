@@ -1,4 +1,4 @@
-import { env } from "@/env";
+import { env, hasRedisConfig } from "@/env";
 import { Redis } from "@upstash/redis";
 
 /**
@@ -6,7 +6,13 @@ import { Redis } from "@upstash/redis";
  * Provides async key-value storage for queue management and caching.
  * Configured with REST API credentials from environment variables.
  */
-export const redis = new Redis({
-  url: env.UPSTASH_REDIS_REST_URL,
-  token: env.UPSTASH_REDIS_REST_TOKEN,
-});
+export function getRedisClient() {
+  if (!hasRedisConfig) {
+    return null;
+  }
+
+  return new Redis({
+    url: env.UPSTASH_REDIS_REST_URL!,
+    token: env.UPSTASH_REDIS_REST_TOKEN!,
+  });
+}

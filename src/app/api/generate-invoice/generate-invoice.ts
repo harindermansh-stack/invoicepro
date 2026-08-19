@@ -120,6 +120,8 @@ export interface GenerateInvoiceInput {
   shouldSendEmail: boolean;
   /** When `false`, the Google Drive upload step is skipped (useful for dry-run calls). */
   shouldUploadToGoogleDrive: boolean;
+  /** When `false`, Telegram notifications are skipped. */
+  shouldSendTelegram: boolean;
   /** Google Drive folder ID that acts as the root for all invoice sub-folders. */
   parentFolderId: string;
   /** Email address of the client company — used to pre-fill the Outlook deeplink. */
@@ -168,6 +170,7 @@ export async function generateInvoice(
   const {
     shouldSendEmail,
     shouldUploadToGoogleDrive,
+    shouldSendTelegram,
     parentFolderId,
     invoiceEmailCompanyTo,
     invoiceEmailRecipient,
@@ -403,10 +406,12 @@ export async function generateInvoice(
     ? `<p><b>⚠️ Test mode warning:</b> Google Drive upload disabled (<code>uploadToGoogleDrive=false</code>)</p><br/>`
     : "";
 
-  // Telegram is always sent; email is conditional on the `shouldSendEmail` flag.
-  const notifications: Promise<unknown>[] = [
-    sendTelegramMessage({
-      message: `${testModeWarningBlock}📝 *Invoices for ${monthAndYear}*
+  const notifications: Promise<unknown>[] = [];
+
+  if (shouldSendTelegram) {
+    notifications.push(
+      sendTelegramMessage({
+        message: `${testModeWarningBlock}📝 *Invoices for ${monthAndYear}*
 
 Invoice No. of: *${invoiceNumberValue}*
 Date: *${dayjs().format("MMMM D, YYYY")}*
@@ -423,12 +428,13 @@ Have a nice day!
 
 Best regards,
 EasyInvoicePDF.com`,
-      files: attachments.map((attachment) => ({
-        filename: attachment.filename,
-        buffer: Buffer.from(attachment.content),
-      })),
-    }),
-  ];
+        files: attachments.map((attachment) => ({
+          filename: attachment.filename,
+          buffer: Buffer.from(attachment.content),
+        })),
+      }),
+    );
+  }
 
   if (shouldSendEmail) {
     notifications.push(
@@ -475,10 +481,11 @@ EasyInvoicePDF.com`,
     formatDuration(performance.now() - notificationStartTime),
   );
 
-  // notifications[0] is always Telegram; notifications[1] is email (when shouldSendEmail).
-  const notifiedByTelegram = notificationResults[0].status === "fulfilled";
+  const notifiedByTelegram = shouldSendTelegram
+    ? notificationResults[0]?.status === "fulfilled"
+    : false;
   const notifiedByEmail = shouldSendEmail
-    ? notificationResults[1]?.status === "fulfilled"
+    ? notificationResults[shouldSendTelegram ? 1 : 0]?.status === "fulfilled"
     : false;
 
   const failedNotifications = notificationResults.filter(
@@ -497,15 +504,17 @@ EasyInvoicePDF.com`,
       errorMessage,
     );
 
-    try {
-      await sendTelegramMessage({
-        message: `🚨 Error in generate-invoice API route\n\n${errorMessage}`,
-      });
-    } catch (telegramError) {
-      console.error(
-        "Failed to send error notification to Telegram:",
-        telegramError,
-      );
+    if (shouldSendTelegram) {
+      try {
+        await sendTelegramMessage({
+          message: `🚨 Error in generate-invoice API route\n\n${errorMessage}`,
+        });
+      } catch (telegramError) {
+        console.error(
+          "Failed to send error notification to Telegram:",
+          telegramError,
+        );
+      }
     }
 
     return {

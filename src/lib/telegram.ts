@@ -1,4 +1,4 @@
-import { env } from "@/env";
+import { env, hasTelegramConfig } from "@/env";
 
 interface SendMessageOptions {
   message: string;
@@ -12,10 +12,17 @@ export async function sendTelegramMessage({
   message,
   files,
 }: SendMessageOptions) {
+  if (!hasTelegramConfig) {
+    throw new Error("Telegram integration is not configured");
+  }
+
+  const telegramBotToken = env.TELEGRAM_BOT_TOKEN!;
+  const telegramChatId = env.TELEGRAM_CHAT_ID!;
+
   try {
     // Send text message
     const textResponse = await fetch(
-      `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`,
+      `https://api.telegram.org/bot${telegramBotToken}/sendMessage`,
       {
         method: "POST",
         headers: {
@@ -25,7 +32,7 @@ export async function sendTelegramMessage({
           Expires: "0",
         },
         body: JSON.stringify({
-          chat_id: env.TELEGRAM_CHAT_ID,
+          chat_id: telegramChatId,
           text: message,
           parse_mode: "Markdown",
         }),
@@ -43,7 +50,7 @@ export async function sendTelegramMessage({
     if (files?.length) {
       for (const file of files) {
         const formData = new FormData();
-        formData.append("chat_id", env.TELEGRAM_CHAT_ID);
+        formData.append("chat_id", telegramChatId);
         formData.append(
           "document",
           new Blob([file.buffer as unknown as BlobPart]),
@@ -51,7 +58,7 @@ export async function sendTelegramMessage({
         );
 
         const fileResponse = await fetch(
-          `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendDocument`,
+          `https://api.telegram.org/bot${telegramBotToken}/sendDocument`,
           {
             method: "POST",
             headers: {

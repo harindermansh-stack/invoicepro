@@ -1,4 +1,4 @@
-import { env } from "@/env";
+import { env, hasGoogleDriveConfig } from "@/env";
 import type { drive_v3 } from "googleapis";
 import { google } from "googleapis";
 import { Readable } from "node:stream";
@@ -48,15 +48,19 @@ type FolderInput = z.infer<typeof FolderInputSchema>;
 let cachedDrive: drive_v3.Drive | undefined;
 
 export async function initializeGoogleDrive() {
+  if (!hasGoogleDriveConfig) {
+    throw new Error("Google Drive integration is not configured");
+  }
+
   if (cachedDrive) {
     return cachedDrive;
   }
 
-  const googlePrivateKey = env.GOOGLE_DRIVE_PRIVATE_KEY.replace(/\\n/g, "\n");
+  const googlePrivateKey = env.GOOGLE_DRIVE_PRIVATE_KEY!.replace(/\\n/g, "\n");
 
   const auth = new google.auth.GoogleAuth({
     credentials: {
-      client_email: env.GOOGLE_DRIVE_CLIENT_EMAIL,
+      client_email: env.GOOGLE_DRIVE_CLIENT_EMAIL!,
       private_key: googlePrivateKey,
     },
     scopes: ["https://www.googleapis.com/auth/drive"],
