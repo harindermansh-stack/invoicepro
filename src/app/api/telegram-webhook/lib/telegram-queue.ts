@@ -1,4 +1,4 @@
-import { redis } from "@/lib/redis";
+import { getRedisClient } from "@/lib/redis";
 
 /**
  * Queues an invoice generation job for a specific Telegram chat.
@@ -8,6 +8,12 @@ import { redis } from "@/lib/redis";
  * @returns Promise<boolean> - true if job was successfully queued, false if already queued
  */
 export async function queueInvoiceGeneration(chatId: number): Promise<boolean> {
+  const redis = getRedisClient();
+
+  if (!redis) {
+    throw new Error("Upstash Redis integration is not configured");
+  }
+
   const key = `telegram:job:${chatId}` as const;
 
   // Atomically set key only if it doesn't exist, with 10-minutes TTL
@@ -28,5 +34,11 @@ export async function queueInvoiceGeneration(chatId: number): Promise<boolean> {
  * @returns Promise<void>
  */
 export async function clearQueuedJob(chatId: number): Promise<void> {
+  const redis = getRedisClient();
+
+  if (!redis) {
+    return;
+  }
+
   await redis.del(`telegram:job:${chatId}`);
 }

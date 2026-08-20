@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { env } from "@/env";
+import { env, hasAuthConfig, hasGoogleDriveConfig, hasResendConfig } from "@/env";
 import { ipLimiter } from "@/lib/rate-limit";
 import { runProductionGenerateMonthlyInvoice } from "./run-production-generate-invoice";
 
@@ -12,6 +12,13 @@ export const maxDuration = 30;
 
 export async function GET(req: NextRequest) {
   try {
+    if (!hasAuthConfig) {
+      return NextResponse.json(
+        { error: "Invoice generation API integration is not configured" },
+        { status: 503 },
+      );
+    }
+
     if (req.headers.get("Authorization") !== `Bearer ${env.AUTH_TOKEN}`) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
@@ -37,13 +44,14 @@ export async function GET(req: NextRequest) {
 
     // If the query param is not set, use the production default.
     const shouldSendEmail =
-      sendEmailParam === null ? isProduction : sendEmailParam !== "false";
+      (sendEmailParam === null ? isProduction : sendEmailParam !== "false") &&
+      hasResendConfig;
 
     // If the query param is not set, use the production default.
     const shouldUploadToGoogleDrive =
       uploadToGoogleDriveParam === null
-        ? isProduction
-        : uploadToGoogleDriveParam !== "false";
+        ? isProduction && hasGoogleDriveConfig
+        : uploadToGoogleDriveParam !== "false" && hasGoogleDriveConfig;
 
     const result = await runProductionGenerateMonthlyInvoice({
       shouldSendEmail,

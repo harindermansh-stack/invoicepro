@@ -1,42 +1,55 @@
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
+const emptyStringToUndefined = (value: unknown) =>
+  value === "" ? undefined : value;
+
+const optionalString = z.preprocess(
+  emptyStringToUndefined,
+  z.string().min(1).optional(),
+);
+
+const optionalEmail = z.preprocess(
+  emptyStringToUndefined,
+  z.string().email().optional(),
+);
+
 export const env = createEnv({
   server: {
-    AUTH_TOKEN: z.string(),
+    AUTH_TOKEN: optionalString,
 
-    RESEND_API_KEY: z.string(),
+    RESEND_API_KEY: optionalString,
 
-    UPSTASH_REDIS_REST_URL: z.string(),
-    UPSTASH_REDIS_REST_TOKEN: z.string(),
+    UPSTASH_REDIS_REST_URL: optionalString,
+    UPSTASH_REDIS_REST_TOKEN: optionalString,
 
-    TELEGRAM_BOT_TOKEN: z.string(),
-    TELEGRAM_CHAT_ID: z.string(),
+    TELEGRAM_BOT_TOKEN: optionalString,
+    TELEGRAM_CHAT_ID: optionalString,
 
-    SELLER_NAME: z.string(),
-    SELLER_ADDRESS: z.string(),
-    SELLER_VAT_NO: z.string(),
-    SELLER_EMAIL: z.string().email(),
-    SELLER_ACCOUNT_NUMBER: z.string(),
-    SELLER_SWIFT_BIC: z.string(),
+    SELLER_NAME: optionalString,
+    SELLER_ADDRESS: optionalString,
+    SELLER_VAT_NO: optionalString,
+    SELLER_EMAIL: optionalEmail,
+    SELLER_ACCOUNT_NUMBER: optionalString,
+    SELLER_SWIFT_BIC: optionalString,
 
-    BUYER_NAME: z.string(),
-    BUYER_ADDRESS: z.string(),
-    BUYER_VAT_NO: z.string(),
-    BUYER_EMAIL: z.string().email(),
+    BUYER_NAME: optionalString,
+    BUYER_ADDRESS: optionalString,
+    BUYER_VAT_NO: optionalString,
+    BUYER_EMAIL: optionalEmail,
 
-    INVOICE_NET_PRICE: z.string(),
-    INVOICE_EMAIL_RECIPIENT: z.string().email(),
-    INVOICE_EMAIL_COMPANY_TO: z.string().email(),
+    INVOICE_NET_PRICE: optionalString,
+    INVOICE_EMAIL_RECIPIENT: optionalEmail,
+    INVOICE_EMAIL_COMPANY_TO: optionalEmail,
 
-    GOOGLE_DRIVE_PARENT_FOLDER_ID: z.string(),
-    GOOGLE_DRIVE_CLIENT_EMAIL: z.string().email(),
-    GOOGLE_DRIVE_PRIVATE_KEY: z.string(),
+    GOOGLE_DRIVE_PARENT_FOLDER_ID: optionalString,
+    GOOGLE_DRIVE_CLIENT_EMAIL: optionalEmail,
+    GOOGLE_DRIVE_PRIVATE_KEY: optionalString,
 
-    GITHUB_TOKEN: z.string(),
+    GITHUB_TOKEN: optionalString,
   },
   client: {
-    NEXT_PUBLIC_SENTRY_DSN: z.string(),
+    NEXT_PUBLIC_SENTRY_DSN: optionalString,
   },
   // If you're using Next.js < 13.4.4, you'll need to specify the runtimeEnv manually
   runtimeEnv: {
@@ -74,5 +87,23 @@ export const env = createEnv({
 
     GITHUB_TOKEN: process.env.GITHUB_TOKEN,
   },
-  // emptyStringAsUndefined: true,
+  emptyStringAsUndefined: true,
 });
+
+export const hasAuthConfig = Boolean(env.AUTH_TOKEN);
+
+export const hasResendConfig = Boolean(env.RESEND_API_KEY);
+
+export const hasRedisConfig = Boolean(
+  env.UPSTASH_REDIS_REST_URL && env.UPSTASH_REDIS_REST_TOKEN,
+);
+
+export const hasTelegramConfig = Boolean(
+  env.TELEGRAM_BOT_TOKEN && env.TELEGRAM_CHAT_ID,
+);
+
+export const hasGoogleDriveConfig = Boolean(
+  env.GOOGLE_DRIVE_PARENT_FOLDER_ID &&
+    env.GOOGLE_DRIVE_CLIENT_EMAIL &&
+    env.GOOGLE_DRIVE_PRIVATE_KEY,
+);

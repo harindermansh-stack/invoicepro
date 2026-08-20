@@ -1,5 +1,7 @@
 import { Ratelimit } from "@upstash/ratelimit";
-import { redis } from "./redis";
+import { getRedisClient } from "./redis";
+
+const redis = getRedisClient();
 
 /**
  * IP-based rate limiter for /api/generate-invoice.
@@ -12,7 +14,7 @@ import { redis } from "./redis";
  *   if (!result.success) { ... }
  */
 export const ipLimiter =
-  process.env.NODE_ENV === "development"
+  process.env.NODE_ENV === "development" || !redis
     ? {
         // in development mode, we don't want to rate limit
         limit: async () => ({ success: true }),

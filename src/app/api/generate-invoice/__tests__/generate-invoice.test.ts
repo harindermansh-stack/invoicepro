@@ -34,6 +34,7 @@ const MOCK_UPLOADED_FILE = {
 const MOCK_INPUT = {
   shouldSendEmail: true,
   shouldUploadToGoogleDrive: true,
+  shouldSendTelegram: true,
   parentFolderId: "parent-folder-id",
   invoiceEmailCompanyTo: "company@test.com",
   invoiceEmailRecipient: "recipient@test.com",
@@ -191,6 +192,26 @@ describe("generateInvoice", () => {
       // Assert each notification happens after all PDF uploads
       expect(lastUploadOrder).toBeLessThan(telegramOrder);
       expect(lastUploadOrder).toBeLessThan(emailOrder);
+    });
+  });
+
+  describe("shouldSendTelegram=false", () => {
+    it("should skip Telegram without affecting email delivery", async () => {
+      const deps = buildDeps();
+      const result = await generateInvoice(deps, {
+        ...MOCK_INPUT,
+        shouldSendTelegram: false,
+      });
+
+      expect(result).toEqual(expect.objectContaining({ ok: true }));
+      expect(deps.sendTelegramMessage).not.toHaveBeenCalled();
+      expect(deps.sendEmail).toHaveBeenCalledTimes(1);
+      expect(result.report).toEqual(
+        expect.objectContaining({
+          notifiedByTelegram: false,
+          notifiedByEmail: true,
+        }),
+      );
     });
   });
 

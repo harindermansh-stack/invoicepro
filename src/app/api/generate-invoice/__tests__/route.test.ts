@@ -29,7 +29,12 @@ const MOCK_ENV = {
 const mockRunProduction = vi.fn();
 const mockIpLimiterLimit = vi.fn();
 
-vi.mock("@/env", () => ({ env: { ...MOCK_ENV } }));
+vi.mock("@/env", () => ({
+  env: { ...MOCK_ENV },
+  hasAuthConfig: true,
+  hasGoogleDriveConfig: true,
+  hasResendConfig: true,
+}));
 
 vi.mock("../run-production-generate-invoice", () => ({
   runProductionGenerateMonthlyInvoice: (...args: unknown[]) =>

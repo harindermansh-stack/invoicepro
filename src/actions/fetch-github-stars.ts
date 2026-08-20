@@ -18,7 +18,9 @@ export const fetchGithubStars = cache(async (): Promise<number> => {
       "https://api.github.com/repos/VladSez/easy-invoice-pdf",
       {
         headers: {
-          Authorization: `Bearer ${env.GITHUB_TOKEN}`,
+          ...(env.GITHUB_TOKEN
+            ? { Authorization: `Bearer ${env.GITHUB_TOKEN}` }
+            : {}),
         },
         next: { revalidate: 60 }, // revalidate every 1 minute (60 seconds)
       },

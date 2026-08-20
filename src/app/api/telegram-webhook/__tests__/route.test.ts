@@ -29,7 +29,11 @@ const mockClearQueuedJob = vi.fn();
 
 const waitUntilPromises: Promise<unknown>[] = [];
 
-vi.mock("@/env", () => ({ env: { ...MOCK_ENV } }));
+vi.mock("@/env", () => ({
+  env: { ...MOCK_ENV },
+  hasRedisConfig: true,
+  hasTelegramConfig: true,
+}));
 
 vi.mock("@vercel/functions", () => ({
   waitUntil: (promise: Promise<unknown>) => {
@@ -277,6 +281,31 @@ describe("POST /api/telegram-webhook — HTTP layer", () => {
         message: "🚨 Error: Unexpected crash",
       });
       expect(mockClearQueuedJob).toHaveBeenCalledWith(CHAT_ID);
+    });
+  });
+
+  describe("optional configuration", () => {
+    it("should return a clear 503 response without calling Telegram when unconfigured", async () => {
+      vi.resetModules();
+      vi.doMock("@/env", () => ({
+        env: {},
+        hasRedisConfig: false,
+        hasTelegramConfig: false,
+      }));
+      vi.doMock("@/lib/telegram", () => ({
+        sendTelegramMessage: (...args: unknown[]) =>
+          mockSendTelegramMessage(...args) as unknown as Promise<void>,
+      }));
+
+      const { POST } = await import("../route");
+      const response = await POST(createRequest(createValidUpdate()));
+
+      expect(response.status).toBe(503);
+      await expect(response.json()).resolves.toEqual({
+        error: "Telegram invoice generation integration is not configured",
+      });
+      expect(mockSendTelegramMessage).not.toHaveBeenCalled();
+      expect(mockQueueInvoiceGeneration).not.toHaveBeenCalled();
     });
   });
 });

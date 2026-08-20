@@ -1,11 +1,16 @@
 import type { InvoiceData } from "@/app/schema";
-import { env } from "@/env";
+import {
+  env,
+  hasGoogleDriveConfig,
+  hasResendConfig,
+  hasTelegramConfig,
+} from "@/env";
 import {
   createOrFindInvoiceFolder,
   initializeGoogleDrive,
   uploadFile,
 } from "@/lib/google-drive";
-import { resend } from "@/lib/resend";
+import { getResendClient } from "@/lib/resend";
 import { sendTelegramMessage } from "@/lib/telegram";
 
 import {
@@ -23,6 +28,8 @@ function buildGenerateInvoiceDeps(
   englishInvoiceData: InvoiceData,
   polishInvoiceData: InvoiceData,
 ): GenerateInvoiceDeps {
+  const resend = getResendClient();
+
   return {
     renderEnInvoice: () =>
       renderInvoicePdfBuffer({ invoiceData: englishInvoiceData }),
@@ -33,7 +40,13 @@ function buildGenerateInvoiceDeps(
     createOrFindInvoiceFolder,
     uploadFile,
     sendTelegramMessage,
-    sendEmail: (args) => resend.emails.send(args),
+    sendEmail: (args) => {
+      if (!resend) {
+        throw new Error("Resend email integration is not configured");
+      }
+
+      return resend.emails.send(args);
+    },
   };
 }
 
@@ -51,15 +64,19 @@ export async function runProductionGenerateMonthlyInvoice(options: {
 }): Promise<GenerateInvoiceResult> {
   const englishInvoiceData = getEnglishInvoiceRealData();
   const polishInvoiceData = getPolishInvoiceRealData(englishInvoiceData);
+  const shouldSendEmail = options.shouldSendEmail && hasResendConfig;
+  const shouldUploadToGoogleDrive =
+    options.shouldUploadToGoogleDrive && hasGoogleDriveConfig;
 
   return generateInvoice(
     buildGenerateInvoiceDeps(englishInvoiceData, polishInvoiceData),
     {
-      shouldSendEmail: options.shouldSendEmail,
-      shouldUploadToGoogleDrive: options.shouldUploadToGoogleDrive,
-      parentFolderId: env.GOOGLE_DRIVE_PARENT_FOLDER_ID,
-      invoiceEmailCompanyTo: env.INVOICE_EMAIL_COMPANY_TO,
-      invoiceEmailRecipient: env.INVOICE_EMAIL_RECIPIENT,
+      shouldSendEmail,
+      shouldUploadToGoogleDrive,
+      shouldSendTelegram: hasTelegramConfig,
+      parentFolderId: env.GOOGLE_DRIVE_PARENT_FOLDER_ID ?? "",
+      invoiceEmailCompanyTo: env.INVOICE_EMAIL_COMPANY_TO ?? "",
+      invoiceEmailRecipient: env.INVOICE_EMAIL_RECIPIENT ?? "",
       englishInvoiceData,
       polishInvoiceData,
     },
