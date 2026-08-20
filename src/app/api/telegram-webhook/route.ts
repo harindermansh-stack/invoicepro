@@ -23,7 +23,9 @@ export const maxDuration = 30; // Set to 30 seconds
  */
 export async function POST(req: NextRequest) {
   try {
-    if (!hasTelegramConfig || !hasRedisConfig) {
+    const telegramChatId = env.TELEGRAM_CHAT_ID;
+
+    if (!hasTelegramConfig || !hasRedisConfig || !telegramChatId) {
       return NextResponse.json(
         { error: "Telegram invoice generation integration is not configured" },
         { status: 503 },
@@ -54,7 +56,7 @@ export async function POST(req: NextRequest) {
     const update = parseResult.data;
 
     const senderChatId = update.message.from.id;
-    const allowedChatId = parseInt(env.TELEGRAM_CHAT_ID, 10);
+    const allowedChatId = parseInt(telegramChatId, 10);
 
     if (senderChatId !== allowedChatId) {
       console.error(
